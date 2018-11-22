@@ -1,0 +1,31 @@
+akka {
+    loglevel=INFO,
+    loggers=["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
+    
+    actor { 
+        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+        deployment {
+            /worker {
+                router = round-robin-pool 
+                nr-of-instances = 5 # max number of total routees
+                cluster {
+                    enabled = on
+                    allow-local-routees = on
+                    use-role = worker
+                    max-nr-of-instances-per-node = 1
+                }
+            }
+        }        
+    }
+    remote {
+        dot-netty.tcp {
+            hostname = localhost
+            port = 0
+        }
+    }
+    cluster {
+        seed-nodes = [
+            "akka.tcp://MyCluster@localhost:4053"]
+        roles = ["watchdog"] 
+    }
+}
