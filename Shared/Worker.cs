@@ -38,7 +38,9 @@ namespace WatchDog
                     case "DIV":
                         result = x.Number1 / x.Number2;
                         break;
-                }                    
+
+                }       
+                Console.WriteLine("result: " + result.ToString());          
             });
         }
     }
