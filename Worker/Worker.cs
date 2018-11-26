@@ -20,7 +20,7 @@ namespace Worker
                             .MinimumLevel.Information()
                             .CreateLogger();
 
-            var hocon = File.ReadAllText("worker.hocon");
+            var hocon = File.ReadAllText("/Users/carsten/Projects/playWithAkkaCluster/Worker/bin/Debug/netcoreapp2.1/osx-x64/publish/worker.hocon");
             var config = ConfigurationFactory.ParseString(hocon);
             var actorsytem = ActorSystem.Create("MyCluster", config);
             Log.Logger.Information("Actor system created");

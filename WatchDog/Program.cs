@@ -23,11 +23,14 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            Serilog.Log.Information("watchdog created");
+            var props = Akka.Actor.Props.Create(() => new WatchDog());
+            var watchDog = cluster.ActorOf(props, "watchdog");
+
+            Log.Logger.Information("watchdog created");
 
             var worker = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
 
-            Serilog.Log.Information("worker router created");
+            Log.Logger.Information("worker router created");
 
             while (true)
             {
