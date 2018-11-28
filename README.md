@@ -1,38 +1,33 @@
-# playWithAkkaCluster
+# Play With Akka Cluster
 
-clone project and do the following to reproduce the problem
+## Main concern
 
-from a command line
-cd seednode
-dotnet run
+Execute the akka.ps1 script in the root. This will start 4 nodes in total. 1 seednode, 1 watchdog, and 2 workers. 
 
-from another command line
-cd worker
-dotnet run
+The watchdog will sent messages to the 2 workers (who are behind a round robin router). So far so good and print the result in the window of the worker. The message is a simply message to add 2 numbers.
 
-from a third command line
-cd watchdog
-dotnet run
+If I now kill one worker (to simulate process crash) then the remaining cluster nodes prints a lots of gossip and the remaing worker node will keep processing messages. 
+
+However if I then cd into the worker folder and launch a new worker by "dotnet run" then a new node is started. I do not believe this new node joins the cluster. At least it does not start processing messages in a round robin fashion.
+
+This is simply do not understand. It is my general understanding that new nodes should be able to join the cluster. What is happening here? Should the cluster not be able to survive a hard process crash for one of the nodes?
+
+Another observation. If I instead of killing a node cd into the worker folder and run "dotnet run" then a 3rd worker node start up, joins the cluster, and starts processing messages.
+
+## Additional questions
+
+### How to avoid coupling on message level for the Akka cluster client example 
+
+In the example you gave me with the Akka Cluster Client the client and the nodes in the cluster shares the PING and PONG messages in a shared assembly.
 
 
-The seednode starts fine. The worker also starts fine and join the cluster
-in a worker role.
+how to wait for the nodes to join the cluster before starting the router
 
-The watchdog has a watchdog role and should deploy a router and actor on
-the node with the worker role. But this produces the following error
 
-[21:26:56 ERR] Error while creating actor instance of type Akka.Actor.ActorBase with 0 args: ()
-[akka.tcp://MyCluster@localhost:63217/remote/akka.tcp/MyCluster@localhost:63222/user/worker/c1#2010254328]: Akka.Actor.ActorInitializationException: Exception during creation ---> System.TypeLoadException: Error while creating actor instance of type Akka.Actor.ActorBase with 0 args: () ---> System.InvalidOperationException: No actor producer specified!
-   at Akka.Actor.Props.DefaultProducer.Produce()
-   at Akka.Actor.Props.NewActor()
-   --- End of inner exception stack trace ---
-   at Akka.Actor.Props.NewActor()
-   at Akka.Actor.ActorCell.CreateNewActorInstance()
-   at Akka.Actor.ActorCell.<>c__DisplayClass109_0.<NewActor>b__0()
-   at Akka.Actor.ActorCell.UseThreadContext(Action action)
-   at Akka.Actor.ActorCell.NewActor()
-   at Akka.Actor.ActorCell.Create(Exception failure)
-   --- End of inner exception stack trace ---
-   at Akka.Actor.ActorCell.HandleFailed(Failed f)
-   at Akka.Actor.ActorCell.SysMsgInvokeAll(EarliestFirstSystemMessageList messages, Int32 currentStat
-   
+
+technique to not share message class.
+
+
+
+
+

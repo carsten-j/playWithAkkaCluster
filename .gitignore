@@ -2,3 +2,8 @@
 bin/
 obj/
 cluster/
+.vs/
+worker1/
+worker2/
+worker/properties/
+*.csproj.user

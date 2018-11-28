@@ -1,11 +1,9 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
+using Akka.Event;
+using Akka.Logger.Serilog;
+using System;
 using System.Diagnostics;
 using System.Linq;
-using Akka.Cluster;
-using Serilog;
-using Akka.Logger.Serilog;
-using Akka.Event;
 using System.Threading;
 
 namespace WatchDog
@@ -16,13 +14,13 @@ namespace WatchDog
 
         public WatchDog()
         {
-            var number = 1;
+            var number = 2;
 
-            var processes = Enumerable.Range(0, number).Select(i => new {i, Process = StartProcess()}).ToDictionary(t => t.i, t => t.Process);
-            
+            var processes = Enumerable.Range(0, number).Select(i => new { i, Process = StartProcess() }).ToDictionary(t => t.i, t => t.Process);
+
             Thread.Sleep(30000);
 
-            Receive<CheckProcesses>(m =>
+            Receive<CheckProcesses>(_ =>
             {
                 foreach (var process in processes.ToList())
                 {
@@ -32,9 +30,9 @@ namespace WatchDog
                     }
                 }
             });
-            
+
             Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10), Self,
-                new CheckProcesses(), Self);                
+                new CheckProcesses(), Self);
         }
 
         private Process StartProcess()
@@ -43,8 +41,9 @@ namespace WatchDog
             {
                 StartInfo =
                 {
-                    FileName = "worker",
-                    WorkingDirectory = @"/Users/carsten/Projects/playWithAkkaCluster/Worker/bin/Debug/netcoreapp2.1/osx-x64/publish/",
+                    FileName = "dotnet",
+                    Arguments = "worker.dll",
+                    WorkingDirectory = @"C:\Users\bc0030\Downloads\playWithAkkaCluster-master\Worker\bin\Debug\netcoreapp2.1\",
                     UseShellExecute = true,
                     RedirectStandardOutput = false,
                     RedirectStandardError = false,
@@ -59,6 +58,6 @@ namespace WatchDog
         }
 
         private class CheckProcesses
-        { }            
+        { }
     }
 }

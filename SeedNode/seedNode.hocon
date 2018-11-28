@@ -2,8 +2,8 @@ akka {
     loglevel=INFO,
     loggers=["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
 
-    actor { 
-        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"       
+    actor {
+        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
     }
 
     remote {
@@ -16,6 +16,14 @@ akka {
     cluster {
         seed-nodes = [
             "akka.tcp://MyCluster@localhost:4053"]
-        roles = ["beacon"] 
+        roles = ["beacon"]
+        split-brain-resolver {
+            active-strategy = keep-referee
+            stable-after = 5s
+            keep-referee {
+                address = "akka.tcp://MyCluster@localhost:4053"
+                down-all-if-less-than-nodes = 1
+            }
+        }
     }
 }

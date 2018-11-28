@@ -1,11 +1,10 @@
-using System;
-using Serilog;
 using Akka.Actor;
-using System.IO;
 using Akka.Configuration;
 using Akka.Routing;
+using Serilog;
+using System;
+using System.IO;
 using System.Threading;
-using Akka.Cluster.Routing;
 
 namespace WatchDog
 {
@@ -23,24 +22,19 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            var props = Akka.Actor.Props.Create(() => new WatchDog());
-            var watchDog = cluster.ActorOf(props, "watchdog");
-
-            Log.Logger.Information("watchdog created");
-
             var worker = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
 
             Log.Logger.Information("worker router created");
 
+            var random = new Random();
+
             while (true)
             {
-                Console.WriteLine("Enter first number ...");
-                var number1 = Console.ReadLine();
-                Console.WriteLine("Enter second number ...");
-                var number2 = Console.ReadLine();
-                Console.WriteLine("Enter operation ...");
-                var opr = Console.ReadLine();
-                var job = new CalculationJob(int.Parse(number1), int.Parse(number2), opr);
+                Thread.Sleep(2000);
+                var number1 = random.Next(10);
+                var number2 = random.Next(10);
+                Log.Logger.Information("Adding number {Number1} and number {Number2}", number1, number2);
+                var job = new CalculationJob(number1, number2, "ADD");
                 worker.Tell(job);
             }
         }

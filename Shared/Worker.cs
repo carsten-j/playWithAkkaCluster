@@ -1,15 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using Akka.Actor;
-using Akka.Cluster;
-using Akka.Cluster.Tools.Client;
-using Akka.Configuration;
-using Akka.Routing;
-using Serilog;
-using Akka.Logger.Serilog;
-using Akka.Event;
-using Akka.Cluster.Routing;
+﻿using Akka.Actor;
+using System;
 
 namespace WatchDog
 {
@@ -29,32 +19,45 @@ namespace WatchDog
                     case "ADD":
                         result = x.Number1 + x.Number2;
                         break;
+
                     case "SUB":
                         result = x.Number1 - x.Number2;
                         break;
+
                     case "MULT":
                         result = x.Number1 * x.Number2;
                         break;
+
                     case "DIV":
                         result = x.Number1 / x.Number2;
                         break;
+                }
 
-                }       
-                Console.WriteLine("result: " + result.ToString());          
+                Console.WriteLine("result: " + result.ToString());
             });
+
+            Receive<ExitApp>(_ => Environment.Exit(1));
+
+            //Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30), Self,
+            //    new ExitApp(), Self);
         }
     }
 
     public class CalculationJob
     {
-        public int Number1 { get; private set;}
-        public int Number2 { get; private set;}
-        public string Operation { get; private set;}
         public CalculationJob(int number1, int number2, string operation)
         {
             Number1 = number1;
             Number2 = number2;
             Operation = operation;
         }
+
+        public int Number1 { get; }
+        public int Number2 { get; }
+        public string Operation { get; }
+    }
+
+    public class ExitApp
+    {
     }
 }

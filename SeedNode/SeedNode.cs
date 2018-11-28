@@ -1,7 +1,6 @@
 ﻿using Akka.Actor;
 using Akka.Configuration;
 using Serilog;
-using System;
 using System.IO;
 
 namespace SeedNode
@@ -20,7 +19,7 @@ namespace SeedNode
             var config = ConfigurationFactory.ParseString(hocon);
 
             var cluster = ActorSystem.Create("MyCluster", config);
-            
+
             cluster.WhenTerminated.Wait();
         }
     }

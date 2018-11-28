@@ -1,13 +1,8 @@
 ﻿using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
-using Akka.Event;
-using Akka.Logger.Serilog;
 using Serilog;
-using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Worker
 {
@@ -20,7 +15,7 @@ namespace Worker
                             .MinimumLevel.Information()
                             .CreateLogger();
 
-            var hocon = File.ReadAllText("/Users/carsten/Projects/playWithAkkaCluster/Worker/bin/Debug/netcoreapp2.1/osx-x64/publish/worker.hocon");
+            var hocon = File.ReadAllText("worker.hocon");
             var config = ConfigurationFactory.ParseString(hocon);
             var actorsytem = ActorSystem.Create("MyCluster", config);
             Log.Logger.Information("Actor system created");
@@ -28,7 +23,7 @@ namespace Worker
             Log.Logger.Information("Actor system joined cluster");
 
             actorsytem.WhenTerminated.Wait();
-            Log.Logger.Information("Actor system terminatedß");
+            Log.Logger.Information("Actor system terminated");
         }
     }
 }
