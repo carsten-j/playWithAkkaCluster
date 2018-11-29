@@ -23,6 +23,7 @@ akka {
         seed-nodes = [
             "akka.tcp://MyCluster@localhost:4053"]
         roles = ["beacon"]
+		downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
         split-brain-resolver {
             active-strategy = keep-referee
             stable-after = 5s
