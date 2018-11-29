@@ -32,7 +32,7 @@ namespace SeedNode
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
             {
-                CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance);
+                CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
             };
 
             cluster.WhenTerminated.Wait();

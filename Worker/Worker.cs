@@ -26,7 +26,7 @@ namespace Worker
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
             {
-                CoordinatedShutdown.Get(actorsytem).Run(CoordinatedShutdown.ClrExitReason.Instance);
+                CoordinatedShutdown.Get(actorsytem).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
             };
 
             actorsytem.WhenTerminated.Wait();

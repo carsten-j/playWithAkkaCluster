@@ -42,7 +42,7 @@ namespace WatchDog
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
                 {
-                    CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance);
+                    CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
                 };
 
             // don't terminate process unless this node is downed or Control + C is invoked.
