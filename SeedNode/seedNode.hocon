@@ -32,5 +32,6 @@ akka {
                 down-all-if-less-than-nodes = 1
             }
         }
+		role.worker.min-nr-of-members = 1
     }
 }

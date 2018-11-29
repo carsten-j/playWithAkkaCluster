@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Akka.Cluster;
 
 namespace WatchDog
 {
@@ -29,15 +30,21 @@ namespace WatchDog
 
             var random = new Random();
 
-            var recurringTask = cluster.Scheduler.Advanced.ScheduleRepeatedlyCancelable(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2),
-                () =>
-                {
-                    var number1 = random.Next(10);
-                    var number2 = random.Next(10);
-                    Log.Logger.Information("Adding number {Number1} and number {Number2}", number1, number2);
-                    var job = new CalculationJob(number1, number2, "ADD");
-                    worker.Tell(job);
-                });
+            // in combination with the akka.cluster.role.frontend.min-nr-of-members = 1 setting,
+            // ensures that we don't start distributing work until at least 1 worker has joined
+            Cluster.Get(cluster).RegisterOnMemberUp(() =>
+            {
+                var recurringTask = cluster.Scheduler.Advanced.ScheduleRepeatedlyCancelable(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2),
+                    () =>
+                    {
+                        var number1 = random.Next(10);
+                        var number2 = random.Next(10);
+                        Log.Logger.Information("Adding number {Number1} and number {Number2}", number1, number2);
+                        var job = new CalculationJob(number1, number2, "ADD");
+                        worker.Tell(job);
+                    });
+            });
+           
 
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
