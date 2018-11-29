@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using Akka.Cluster;
 using Akka.Configuration;
 using Serilog;
@@ -21,6 +22,12 @@ namespace Worker
             Log.Logger.Information("Actor system created");
 
             Log.Logger.Information("Actor system joined cluster");
+
+            // allow process to exit when Control + C is invoked
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                CoordinatedShutdown.Get(actorsytem).Run(CoordinatedShutdown.ClrExitReason.Instance);
+            };
 
             actorsytem.WhenTerminated.Wait();
             Log.Logger.Information("Actor system terminated");
