@@ -18,7 +18,7 @@ akka {
             "akka.tcp://MyCluster@localhost:4053"]
         roles = ["worker"]
 
-        downing-provider-class = "Akka.Cluster.SplitBrainResolver.SplitBrainResolverDowningProvider, Akka.Cluster.SplitBrainResolver"
+        downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
         split-brain-resolver {
             active-strategy = keep-referee
             stable-after = 5s
@@ -27,5 +27,6 @@ akka {
                 down-all-if-less-than-nodes = 1
             }
         }
+		role.worker.min-nr-of-members = 1
     }
 }
