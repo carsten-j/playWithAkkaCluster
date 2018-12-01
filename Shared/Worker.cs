@@ -37,9 +37,6 @@ namespace WatchDog
             });
 
             Receive<ExitApp>(_ => Environment.Exit(1));
-
-            //Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(30), Self,
-            //    new ExitApp(), Self);
         }
     }
 
@@ -55,9 +52,5 @@ namespace WatchDog
         public int Number1 { get; }
         public int Number2 { get; }
         public string Operation { get; }
-    }
-
-    public class ExitApp
-    {
     }
 }

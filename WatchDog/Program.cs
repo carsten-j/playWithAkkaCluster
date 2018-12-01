@@ -1,12 +1,11 @@
 using Akka.Actor;
+using Akka.Cluster;
 using Akka.Configuration;
 using Akka.Routing;
 using Serilog;
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using Akka.Cluster;
 
 namespace WatchDog
 {
@@ -24,7 +23,8 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            var worker = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
+            var worker = cluster.ActorOf(
+                Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
 
             Log.Logger.Information("worker router created");
 
@@ -34,8 +34,8 @@ namespace WatchDog
             // ensures that we don't start distributing work until at least 1 worker has joined
             Cluster.Get(cluster).RegisterOnMemberUp(() =>
             {
-                var recurringTask = cluster.Scheduler.Advanced.ScheduleRepeatedlyCancelable(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2),
-                    () =>
+                var recurringTask = cluster.Scheduler.Advanced.ScheduleRepeatedlyCancelable(
+                    TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), () =>
                     {
                         var number1 = random.Next(10);
                         var number2 = random.Next(10);
@@ -44,17 +44,15 @@ namespace WatchDog
                         worker.Tell(job);
                     });
             });
-           
 
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
-                {
-                    CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
-                };
+            {
+                CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
+            };
 
             // don't terminate process unless this node is downed or Control + C is invoked.
             await cluster.WhenTerminated;
         }
-
     }
 }

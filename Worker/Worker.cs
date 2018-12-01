@@ -1,8 +1,7 @@
-﻿using System;
-using Akka.Actor;
-using Akka.Cluster;
+﻿using Akka.Actor;
 using Akka.Configuration;
 using Serilog;
+using System;
 using System.IO;
 
 namespace Worker
@@ -18,6 +17,7 @@ namespace Worker
 
             var hocon = File.ReadAllText("worker.hocon");
             var config = ConfigurationFactory.ParseString(hocon);
+
             var actorsytem = ActorSystem.Create("MyCluster", config);
             Log.Logger.Information("Actor system created");
 

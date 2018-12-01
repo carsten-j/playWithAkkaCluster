@@ -1,12 +1,6 @@
-# based on values from https://cmd.petabridge.com/articles/install/host-configuration.html
-petabridge.cmd{
-	# default port number used to listen for incoming petabridge.cmd client connections
-	port = 9110
-}
-
 akka {
-    loglevel=INFO,
-    loggers=["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
+    loglevel = INFO,
+    loggers = ["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
 
     actor {
         provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
@@ -15,6 +9,8 @@ akka {
     remote {
         dot-netty.tcp {
             hostname = localhost
+            # seed nodes are identified as nodes with same port number here and
+            # for the seed-nodes section under the cluster configuration
             port = 4053
         }
     }
@@ -23,15 +19,21 @@ akka {
         seed-nodes = [
             "akka.tcp://MyCluster@localhost:4053"]
         roles = ["beacon"]
-		downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
+        downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
         split-brain-resolver {
             active-strategy = keep-referee
-            stable-after = 5s
+            stable-after = 3s
             keep-referee {
                 address = "akka.tcp://MyCluster@localhost:4053"
                 down-all-if-less-than-nodes = 1
             }
         }
-		role.worker.min-nr-of-members = 1
+        role.worker.min-nr-of-members = 1
     }
+}
+
+petabridge.cmd {
+    # based on values from https://cmd.petabridge.com/articles/install/host-configuration.html
+    # default port number used to listen for incoming petabridge.cmd client connections
+    port = 9110
 }

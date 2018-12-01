@@ -1,11 +1,10 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Configuration;
-using Serilog;
-using System.IO;
-using Petabridge.Cmd;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Host;
+using Serilog;
+using System;
+using System.IO;
 
 namespace SeedNode
 {
@@ -24,12 +23,14 @@ namespace SeedNode
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            // use PBM to manage cluster membership
+            // Use PBM to manage cluster membership
             var pbm = PetabridgeCmd.Get(cluster);
-            pbm.RegisterCommandPalette(ClusterCommands.Instance); // activate clustering commands
-            pbm.Start(); // start Petabridge.Cmd host on 9110 (configured in HOCON)
+            // Activate clustering commands
+            pbm.RegisterCommandPalette(ClusterCommands.Instance);
+            // Start Petabridge.Cmd host on 9110 (configured in HOCON)
+            pbm.Start();
 
-            // allow process to exit when Control + C is invoked
+            // Allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
             {
                 CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
