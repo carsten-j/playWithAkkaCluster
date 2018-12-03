@@ -36,12 +36,12 @@ namespace WatchDog
 
                     // when the worker has been running for more than a given period
                     // then we kill the process and restart it
-                    var processHasBeenRunning = DateTime.Now - process.Value.StartTime;
-                    if (processHasBeenRunning.TotalMinutes > 1)
-                    {
-                        processes[process.Key].Kill();
-                        processes[process.Key] = StartProcess(0);
-                    }
+                    //var processHasBeenRunning = DateTime.Now - process.Value.StartTime;
+                    //if (processHasBeenRunning.TotalMinutes > 1)
+                    //{
+                    //    processes[process.Key].Kill();
+                    //    processes[process.Key] = StartProcess(0);
+                    //}
                 }
             });
 
@@ -51,13 +51,16 @@ namespace WatchDog
 
         private Process StartProcess(int waitSeconds)
         {
+            var currentDir = System.IO.Directory.GetCurrentDirectory();
+            var workerDir = @"..\..\..\..\Worker\bin\Debug\netcoreapp2.1\";
+            var workingDir = System.IO.Path.Combine(currentDir, workerDir);
             var process = new Process
             {
                 StartInfo =
                 {
                     FileName = "dotnet",
                     Arguments = "worker.dll",
-                    WorkingDirectory = @"C:\Users\bc0030\Downloads\playWithAkkaCluster-master\Worker\bin\Debug\netcoreapp2.1\",
+                    WorkingDirectory = workingDir,
                     UseShellExecute = true,
                     RedirectStandardOutput = false,
                     RedirectStandardError = false,
