@@ -35,8 +35,6 @@ namespace WatchDog
 
                 Console.WriteLine("result: " + result.ToString());
             });
-
-            Receive<ExitApp>(_ => Environment.Exit(1));
         }
     }
 

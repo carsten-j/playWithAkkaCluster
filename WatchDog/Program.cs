@@ -5,13 +5,14 @@ using Akka.Routing;
 using Serilog;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WatchDog
 {
     internal static class MainClass
     {
-        public static async Task Main()
+        public static void Main()
         {
             Log.Logger = new LoggerConfiguration()
                             .WriteTo.Console()
@@ -23,8 +24,10 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            var worker = cluster.ActorOf(
-                Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
+            var props = Props.Create(() => new WatchDog());
+            var watchDog = cluster.ActorOf(props, "watchdog");
+
+            var worker = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
 
             Log.Logger.Information("worker router created");
 
@@ -52,7 +55,7 @@ namespace WatchDog
             };
 
             // don't terminate process unless this node is downed or Control + C is invoked.
-            await cluster.WhenTerminated;
+            cluster.WhenTerminated.Wait();
         }
     }
 }
