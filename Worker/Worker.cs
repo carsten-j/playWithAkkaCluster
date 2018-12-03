@@ -18,7 +18,10 @@ namespace Worker
             var hocon = File.ReadAllText("worker.hocon");
             var config = ConfigurationFactory.ParseString(hocon);
 
-            var actorsytem = ActorSystem.Create("MyCluster", config);
+            var actorSystem = ActorSystem.Create("MyCluster", config);
+
+            var worker = actorSystem.ActorOf(Props.Create(() => new WatchDog.Worker()), "worker");
+
             Log.Logger.Information("Actor system created");
 
             Log.Logger.Information("Actor system joined cluster");
@@ -26,10 +29,10 @@ namespace Worker
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += (sender, e) =>
             {
-                CoordinatedShutdown.Get(actorsytem).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
+                CoordinatedShutdown.Get(actorSystem).Run(CoordinatedShutdown.ClrExitReason.Instance).Wait();
             };
 
-            actorsytem.WhenTerminated.Wait();
+            actorSystem.WhenTerminated.Wait();
             Log.Logger.Information("Actor system terminated");
         }
     }

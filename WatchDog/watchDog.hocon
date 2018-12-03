@@ -5,14 +5,15 @@ akka {
     actor {
         provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
         deployment {
-            /worker {
-                router = round-robin-pool
-                nr-of-instances = 5 # max number of total routees
+            /distributor {
+                router = round-robin-group
+                routees.paths = ["/user/worker"]
+                #nr-of-instances = 5 # max number of total routees
                 cluster {
                     enabled = on
-                    allow-local-routees = on
+                    allow-local-routees = off
                     use-role = worker
-                    max-nr-of-instances-per-node = 1
+                    #max-nr-of-instances-per-node = 1
                 }
             }
         }
@@ -29,6 +30,7 @@ akka {
         seed-nodes = [
             "akka.tcp://MyCluster@localhost:4053"]
         roles = ["watchdog"]
+        pub-sub.role = watchdog
         downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
         split-brain-resolver {
             active-strategy = keep-referee

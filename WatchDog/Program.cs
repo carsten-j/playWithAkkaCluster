@@ -24,10 +24,9 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster", config);
 
-            var props = Props.Create(() => new WatchDog());
-            var watchDog = cluster.ActorOf(props, "watchdog");
+            var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
 
-            var worker = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "worker");
+            var distributor = cluster.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), "distributor");
 
             Log.Logger.Information("worker router created");
 
@@ -44,7 +43,7 @@ namespace WatchDog
                         var number2 = random.Next(10);
                         Log.Logger.Information("Adding number {Number1} and number {Number2}", number1, number2);
                         var job = new CalculationJob(number1, number2, "ADD");
-                        worker.Tell(job);
+                        distributor.Tell(job);
                     });
             });
 
