@@ -34,6 +34,7 @@ namespace WatchDog
                 }
 
                 Console.WriteLine("result: " + result.ToString());
+                Sender.Tell(new CalculationResult(result));
             });
         }
     }
@@ -50,5 +51,15 @@ namespace WatchDog
         public int Number1 { get; }
         public int Number2 { get; }
         public string Operation { get; }
+    }
+
+    public class CalculationResult
+    {
+        public CalculationResult(int result)
+        {
+            Result = result;
+        }
+
+        public int Result { get; }
     }
 }

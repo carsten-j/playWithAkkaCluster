@@ -1,8 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using WebAPI.Service;
 
 namespace WebAPI.Controllers
 {
@@ -10,11 +9,22 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly IActorService _service;
+
+        public ValuesController(IActorService service)
+        {
+            _service = service;
+        }
+
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public async Task<ActionResult<IEnumerable<string>>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var res = await _service.Get();
+
+            var foo = res.Result.ToString();
+
+            return new string[] { "value1", "value2", /*foo*/ };
         }
 
         // GET api/values/5

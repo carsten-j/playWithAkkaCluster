@@ -42,4 +42,5 @@ akka {
         }
         role.worker.min-nr-of-members = 1
     }
+    extensions = ["Akka.Cluster.Tools.Client.ClusterClientReceptionistExtensionProvider, Akka.Cluster.Tools"]
 }
