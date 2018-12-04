@@ -8,12 +8,10 @@ akka {
             /distributor {
                 router = round-robin-group
                 routees.paths = ["/user/worker"]
-                #nr-of-instances = 5 # max number of total routees
                 cluster {
                     enabled = on
                     allow-local-routees = off
                     use-role = worker
-                    #max-nr-of-instances-per-node = 1
                 }
             }
         }
@@ -22,7 +20,7 @@ akka {
     remote {
         dot-netty.tcp {
             hostname = localhost
-            port = 0
+            port = 4055
         }
     }
 
@@ -42,5 +40,6 @@ akka {
         }
         role.worker.min-nr-of-members = 1
     }
+
     extensions = ["Akka.Cluster.Tools.Client.ClusterClientReceptionistExtensionProvider, Akka.Cluster.Tools"]
 }

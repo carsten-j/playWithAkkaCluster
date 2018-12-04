@@ -1,14 +1,14 @@
+using Akka.Actor;
+using Akka.Cluster.Tools.Client;
+using Akka.Event;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using Akka.Actor;
-using Akka.Cluster.Tools.Client;
 using WatchDog;
 
 namespace WebAPI.Service
 {
-
     public interface IActorService
     {
         Task<CalculationResult> Get();
@@ -17,10 +17,13 @@ namespace WebAPI.Service
     public class ActorService : IActorService
     {
         private readonly IActorRef _clusterClient;
+        private readonly ILoggingAdapter _log;
 
         public ActorService(ActorSystem actorSystem)
         {
-            var receptionistAddress = Address.Parse("akka.tcp://MyCluster@localhost:4053");
+            _log = actorSystem.Log;
+
+            var receptionistAddress = Address.Parse("akka.tcp://MyCluster@localhost:4055");
 
             var actorPaths = new List<ActorPath>
             {
@@ -40,9 +43,9 @@ namespace WebAPI.Service
 
             var res = await _clusterClient.Ask<CalculationResult>(
                 new ClusterClient.Send("/user/distributor", msg), timeout);
+            _log.Info("Result was {Res}", res);
 
             return res;
         }
     }
-
 }

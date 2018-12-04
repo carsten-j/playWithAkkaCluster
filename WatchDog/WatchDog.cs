@@ -17,9 +17,7 @@ namespace WatchDog
         {
             const int number = 2;
 
-            var waitForSeconds = new List<int>();
-            waitForSeconds.Add(0);
-            waitForSeconds.Add(30);
+            var waitForSeconds = new List<int> {0, 30};
 
             var processes = Enumerable.Range(0, number).Select(i => new {i, Process = StartProcess(waitForSeconds[i])})
                 .ToDictionary(t => t.i, t => t.Process);

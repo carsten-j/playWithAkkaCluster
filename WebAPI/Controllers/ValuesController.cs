@@ -24,7 +24,7 @@ namespace WebAPI.Controllers
 
             var foo = res.Result.ToString();
 
-            return new string[] { "value1", "value2", /*foo*/ };
+            return new string[] { "value1", "value2", foo };
         }
 
         // GET api/values/5
