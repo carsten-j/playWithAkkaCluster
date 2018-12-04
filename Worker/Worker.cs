@@ -23,8 +23,6 @@ namespace Worker
             var actorSystem = ActorSystem.Create("MyCluster",
                 config.WithFallback(ClusterClientReceptionist.DefaultConfig()));
 
-            var worker = actorSystem.ActorOf(Props.Create(() => new WatchDog.Worker()), "worker");
-
             Log.Logger.Information("Actor system created");
 
             Log.Logger.Information("Actor system joined cluster");

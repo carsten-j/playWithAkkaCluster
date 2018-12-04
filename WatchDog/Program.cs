@@ -26,7 +26,7 @@ namespace WatchDog
 
             var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
 
-            var distributor = cluster.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), "distributor");
+            var distributor = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "distributor");
 
             ClusterClientReceptionist.Get(cluster).RegisterService(distributor);
 

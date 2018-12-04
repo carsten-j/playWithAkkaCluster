@@ -6,8 +6,7 @@ akka {
         provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
         deployment {
             /distributor {
-                router = round-robin-group
-                routees.paths = ["/user/worker"]
+                router = round-robin-pool
                 cluster {
                     enabled = on
                     allow-local-routees = off
