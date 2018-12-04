@@ -29,3 +29,9 @@ akka {
         role.worker.min-nr-of-members = 1
     }
 }
+
+petabridge.cmd {
+    # based on values from https://cmd.petabridge.com/articles/install/host-configuration.html
+    # default port number used to listen for incoming petabridge.cmd client connections
+    port = {PORT}
+}

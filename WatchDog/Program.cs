@@ -2,6 +2,8 @@ using Akka.Actor;
 using Akka.Cluster.Tools.Client;
 using Akka.Configuration;
 using Akka.Routing;
+using Petabridge.Cmd.Cluster;
+using Petabridge.Cmd.Host;
 using Serilog;
 using System;
 using System.IO;
@@ -23,6 +25,13 @@ namespace WatchDog
 
             var cluster = ActorSystem.Create("MyCluster",
                 config.WithFallback(ClusterClientReceptionist.DefaultConfig()));
+
+            // Use PBM to manage cluster membership
+            var pbm = PetabridgeCmd.Get(cluster);
+            // Activate clustering commands
+            pbm.RegisterCommandPalette(ClusterCommands.Instance);
+            // Start Petabridge.Cmd host on 9111 (configured in HOCON)
+            pbm.Start();
 
             var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
 

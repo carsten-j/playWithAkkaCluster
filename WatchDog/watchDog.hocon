@@ -42,3 +42,9 @@ akka {
 
     extensions = ["Akka.Cluster.Tools.Client.ClusterClientReceptionistExtensionProvider, Akka.Cluster.Tools"]
 }
+
+petabridge.cmd {
+    # based on values from https://cmd.petabridge.com/articles/install/host-configuration.html
+    # default port number used to listen for incoming petabridge.cmd client connections
+    port = 9111
+}
