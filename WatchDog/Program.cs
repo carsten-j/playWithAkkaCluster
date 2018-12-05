@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Akka.Cluster.Tools.Client;
+using Akka.Cluster.Tools.Singleton;
 using Akka.Configuration;
 using Akka.Routing;
 using Petabridge.Cmd.Cluster;
@@ -34,13 +35,24 @@ namespace WatchDog
             // Start Petabridge.Cmd host on 9111 (configured in HOCON)
             pbm.Start();
 
-            var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
+            var watchdog = cluster.ActorOf(ClusterSingletonManager.Props(
+                singletonProps: Props.Create(() => new WatchDog()),
+                terminationMessage: PoisonPill.Instance,
+                settings: ClusterSingletonManagerSettings.Create(cluster).WithRole("watchdog")),
+                name: "watcher");
 
-            var supervisorStrategy = new OneForOneStrategy(10, TimeSpan.FromMinutes(3), Decider.From(e =>
-            {
-                if (e is DivideByZeroException || e is UnknownOperationException) return Directive.Resume;
-                return Directive.Escalate;
-            }));
+            //var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
+
+            var supervisorStrategy = new OneForOneStrategy(
+                maxNrOfRetries: 10,
+                withinTimeRange: TimeSpan.FromMinutes(3),
+                decider: Decider.From(e =>
+                {
+                    if (e is DivideByZeroException ||
+                        e is UnknownOperationException)
+                            return Directive.Resume;
+                    return Directive.Escalate;
+                }));
 
             var distributor =
                 cluster.ActorOf(
