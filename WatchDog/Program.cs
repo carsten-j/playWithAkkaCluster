@@ -5,6 +5,7 @@ using Akka.Routing;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Host;
 using Serilog;
+using Shared;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -35,7 +36,17 @@ namespace WatchDog
 
             var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
 
-            var distributor = cluster.ActorOf(Props.Create(() => new Worker()).WithRouter(FromConfig.Instance), "distributor");
+            var supervisorStrategy = new OneForOneStrategy(10, TimeSpan.FromMinutes(3), Decider.From(e =>
+            {
+                if (e is DivideByZeroException || e is UnknownOperationException) return Directive.Resume;
+                return Directive.Escalate;
+            }));
+
+            var distributor =
+                cluster.ActorOf(
+                    Props.Create(() => new Worker())
+                        .WithRouter(FromConfig.Instance)
+                        .WithSupervisorStrategy(supervisorStrategy), "distributor");
 
             ClusterClientReceptionist.Get(cluster).RegisterService(distributor);
 
@@ -43,10 +54,10 @@ namespace WatchDog
 
             // allow process to exit when Control + C is invoked
             Console.CancelKeyPress += async (sender, e) =>
-                {
-                    await CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance)
-                        .ConfigureAwait(false);
-                };
+            {
+                await CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance)
+                    .ConfigureAwait(false);
+            };
 
             // don't terminate process unless this node is downed or Control + C is invoked.
             await cluster.WhenTerminated;

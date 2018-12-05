@@ -1,5 +1,7 @@
 akka {
-    loglevel = INFO,
+    loglevel = DEBUG,  # INFO is default
+    stdout-loglevel = DEBUG # WARNING is default
+    log-config-on-start = on
     loggers = ["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
 
     actor {
@@ -14,6 +16,13 @@ akka {
                 }
             }
         }
+        debug {
+            receive = on # log any received message
+            autoreceive= on # log automatically received messages, e.g. PoisonPill
+            lifecycle = on # log actor lifecycle changes
+            event-stream = on # log subscription changes for Akka.NET event stream
+            unhandled = on # log unhandled messages sent to actors
+          }
     }
 
     remote {

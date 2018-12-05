@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace WatchDog
 {
-    public class WatchDog : ReceiveActor
+    public class WatchDog : ReceiveActor, ILogReceive
     {
         private readonly ILoggingAdapter _log = Context.GetLogger<SerilogLoggingAdapter>();
 
@@ -17,7 +17,7 @@ namespace WatchDog
         {
             const int number = 2;
 
-            var waitForSeconds = new List<int> {0, 30};
+            var waitForSeconds = new List<int> {0, 2};
 
             var processes = Enumerable.Range(0, number).Select(i => new {i, Process = StartProcess(waitForSeconds[i])})
                 .ToDictionary(t => t.i, t => t.Process);
@@ -31,20 +31,24 @@ namespace WatchDog
                     {
                         processes[process.Key] = StartProcess(0);
                     }
+                }
+            });
 
+            Receive<RecycleProcesses>(_ =>
+            {
+                foreach (var process in processes.ToList())
+                {
                     // when the worker has been running for more than a given period
                     // then we kill the process and restart it
-                    //var processHasBeenRunning = DateTime.Now - process.Value.StartTime;
-                    //if (processHasBeenRunning.TotalMinutes > 1)
-                    //{
-                    //    processes[process.Key].Kill();
-                    //    processes[process.Key] = StartProcess(0);
-                    //}
+                    processes[process.Key].Kill();
+                    processes[process.Key] = StartProcess(0);
                 }
             });
 
             Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10), Self,
                 new CheckProcesses(), Self);
+
+            Context.System.Scheduler.ScheduleTellOnce(TimeSpan.FromMinutes(30), Self, new RecycleProcesses(), Self);
         }
 
         private Process StartProcess(int waitSeconds)
@@ -73,7 +77,8 @@ namespace WatchDog
             return process;
         }
 
-        private class CheckProcesses
-        { }
+        private class CheckProcesses { }
+
+        private class RecycleProcesses { }
     }
 }

@@ -1,19 +1,26 @@
 ﻿using Akka.Actor;
+using Akka.Cluster;
+using Akka.Event;
+using Akka.Logger.Serilog;
 using System;
 
-namespace WatchDog
+namespace Shared
 {
-    public class Worker : ReceiveActor
+    public class Worker : ReceiveActor, ILogReceive
     {
-        private readonly string workerId;
+        private readonly Cluster _cluster = Cluster.Get(Context.System);
+        private readonly ILoggingAdapter _log = Context.GetLogger<SerilogLoggingAdapter>();
+
+        private readonly string _internalId;
 
         public Worker()
         {
-            workerId = Guid.NewGuid().ToString();
+            _internalId = Guid.NewGuid().ToString();
 
             Receive<CalculationJob>(x =>
             {
-                int result = 0;
+                _log.Info("Handled by worker with id {Id}", _internalId);
+                int result;
                 switch (x.Operation)
                 {
                     case "ADD":
@@ -24,42 +31,47 @@ namespace WatchDog
                         result = x.Number1 - x.Number2;
                         break;
 
-                    case "MULT":
+                    case "MUL":
                         result = x.Number1 * x.Number2;
                         break;
 
                     case "DIV":
                         result = x.Number1 / x.Number2;
                         break;
+
+                    default:
+                        throw new UnknownOperationException();
                 }
 
-                Console.WriteLine("result: " + result.ToString());
+                _log.Info(
+                    "Address [{Address}] received message [{@Message}] from sender {Sender} and returned result {Result}",
+                    _cluster.SelfAddress, x, Sender, result.ToString());
                 Sender.Tell(new CalculationResult(result));
             });
         }
-    }
 
-    public class CalculationJob
-    {
-        public CalculationJob(int number1, int number2, string operation)
+        protected override void PreStart()
         {
-            Number1 = number1;
-            Number2 = number2;
-            Operation = operation;
+            _log.Info("Worker with id {Id} in PreStart", _internalId);
+            //_cluster.Subscribe(this.Self, ClusterEvent.InitialStateAsEvents, new[]
+            //{
+            //    typeof(ClusterEvent.IMemberEvent),
+            //    typeof(ClusterEvent.UnreachableMember),
+            //    typeof(ClusterEvent.MemberUp)
+            //});
         }
 
-        public int Number1 { get; }
-        public int Number2 { get; }
-        public string Operation { get; }
-    }
-
-    public class CalculationResult
-    {
-        public CalculationResult(int result)
+        protected override void PostStop()
         {
-            Result = result;
+            _log.Info("Worker with id {Id} in PostStop", _internalId);
+            //_cluster.Unsubscribe(this.Self);
         }
 
-        public int Result { get; }
+        //protected override SupervisorStrategy SupervisorStrategy()
+        //{
+        //    return new OneForOneStrategy(Decider.From(Directive.Resume,
+        //        new KeyValuePair<Type, Directive>(typeof(UnknownOperationException)
+        //            , Directive.Stop)));
+        //}
     }
 }

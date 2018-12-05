@@ -1,17 +1,17 @@
 using Akka.Actor;
 using Akka.Cluster.Tools.Client;
 using Akka.Event;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
-using WatchDog;
 
 namespace WebAPI.Service
 {
     public interface IActorService
     {
-        Task<CalculationResult> Get();
+        Task<CalculationResult> Get(int number1, int number2, string operation);
     }
 
     public class ActorService : IActorService
@@ -36,10 +36,10 @@ namespace WebAPI.Service
                 .WithInitialContacts(actorPaths)), "client");
         }
 
-        public async Task<CalculationResult> Get()
+        public async Task<CalculationResult> Get(int number1, int number2, string operation)
         {
             var timeout = TimeSpan.FromSeconds(10);
-            var msg = new CalculationJob(3, 5, "ADD");
+            var msg = new CalculationJob(number1, number2, operation);
 
             var res = await _clusterClient.Ask<CalculationResult>(
                 new ClusterClient.Send("/user/distributor", msg), timeout);

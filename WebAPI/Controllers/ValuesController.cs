@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<string>>> Get()
         {
-            var res = await _service.Get();
+            var res = await _service.Get(4, 5, "ADD");
 
             var foo = res.Result.ToString();
 
@@ -36,8 +36,9 @@ namespace WebAPI.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task PostAsync([FromBody] Input input)
         {
+            var res = await _service.Get(int.Parse(input.Value1), int.Parse(input.Value2), input.Operation);
         }
 
         // PUT api/values/5
@@ -51,5 +52,12 @@ namespace WebAPI.Controllers
         public void Delete(int id)
         {
         }
+    }
+
+    public class Input
+    {
+        public string Value1 { get; set; }
+        public string Value2 { get; set; }
+        public string Operation { get; set; }
     }
 }

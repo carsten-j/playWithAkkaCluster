@@ -33,10 +33,10 @@ namespace SeedNode
 
             // Allow process to exit when Control + C is invoked
             Console.CancelKeyPress += async (sender, e) =>
-                {
-                    await CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance)
-                        .ConfigureAwait(false);
-                };
+            {
+                await CoordinatedShutdown.Get(cluster).Run(CoordinatedShutdown.ClrExitReason.Instance)
+                    .ConfigureAwait(false);
+            };
 
             await cluster.WhenTerminated;
             Log.Logger.Information("Seed actor system terminated");
