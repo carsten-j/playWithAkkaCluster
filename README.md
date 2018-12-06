@@ -31,7 +31,7 @@ a method the throws a UnknownOperationException then both routees gets their Pre
 
 You can reproduce this by opening the solution in Visual Studio and set the following projects to run on start up:
 
-![alt text](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+![alt text](https://github.com/carsten-j/playWithAkkaCluster/blob/master/Images/startup-projects.PNG)
 
 Looking at both workers one can see that PostStop and PreStart was called for both routees. This is a surprise to me. I expected the Resume choice to means that no routees were restarted and just use existing routees continuily. What is happening here?
 
