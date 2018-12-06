@@ -1,7 +1,5 @@
 # Play With Akka Cluster
 
-I am already working on my second blog post about Akka Clusters :-) I do realize that you have already helped a lot so please stop me if I ask to many questions. 
-
 ## First question
 I have a cluster pool router and I do not understand the behaviour around the supervisor strategy that I have set up.
 
@@ -26,12 +24,24 @@ Here is the definition of the supervisor strategy and the pool router
                 .WithSupervisorStrategy(supervisorStrategy), "distributor");
 ```
 
-I have set the supervisor strategy to be "resume" if a UnknownOperationException occurs. Since this is a one for one strategy then I would expect that only one routee is restarted.  I have 2 routees and from their PreStart and PostStop methods methods I log a message. What I do see is that when I call
-a method the throws a UnknownOperationException then both routees gets their PreStart and PostStop methods executes.
+I have set the supervisor strategy to be "resume" if a UnknownOperationException occurs. Since this is a one for one strategy then I would expect that only one routee was affected. I have 2 routees and from their PreStart and PostStop methods methods I log a message. What I do see is that when I call
+a method that throws a UnknownOperationException then both routees gets their PreStart and PostStop methods executes.
 
 You can reproduce this by opening the solution in Visual Studio and set the following projects to run on start up:
 
 ![alt text](https://github.com/carsten-j/playWithAkkaCluster/blob/master/Images/startup-projects.PNG)
+
+Start the solution and observe this:
+
+![alt text](https://github.com/carsten-j/playWithAkkaCluster/blob/master/Images/worker1.PNG)
+
+and
+
+![alt text](https://github.com/carsten-j/playWithAkkaCluster/blob/master/Images/worker2.PNG)
+
+where the exception is logged here:
+
+![alt text](https://github.com/carsten-j/playWithAkkaCluster/blob/master/Images/exception.PNG)
 
 Looking at both workers one can see that PostStop and PreStart was called for both routees. This is a surprise to me. I expected the Resume choice to means that no routees were restarted and just use existing routees continuily. What is happening here?
 
