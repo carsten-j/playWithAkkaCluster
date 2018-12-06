@@ -1,34 +1,15 @@
 akka {
-    loglevel = DEBUG,  # INFO is default
-    stdout-loglevel = DEBUG # WARNING is default
-    log-config-on-start = on
+    loglevel = INFO,
     loggers = ["Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog"]
 
     actor {
         provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
-        deployment {
-            /distributor {
-                router = round-robin-pool
-                cluster {
-                    enabled = on
-                    allow-local-routees = off
-                    use-role = worker
-                }
-            }
-        }
-        debug {
-            receive = on # log any received message
-            autoreceive= on # log automatically received messages, e.g. PoisonPill
-            lifecycle = on # log actor lifecycle changes
-            event-stream = on # log subscription changes for Akka.NET event stream
-            unhandled = on # log unhandled messages sent to actors
-          }
     }
 
     remote {
         dot-netty.tcp {
             hostname = localhost
-            port = 4055
+            port = 0
         }
     }
 
@@ -36,7 +17,6 @@ akka {
         seed-nodes = [
             "akka.tcp://MyCluster@localhost:4053"]
         roles = ["watchdog"]
-        pub-sub.role = watchdog
         downing-provider-class = "Akka.Cluster.SplitBrainResolver, Akka.Cluster"
         split-brain-resolver {
             active-strategy = keep-referee
@@ -47,9 +27,13 @@ akka {
             }
         }
         role.worker.min-nr-of-members = 1
+        singleton {
+          singleton-name = "watchdog"
+          role = "watchdog"
+          hand-over-retry-interval = 1s
+          min-number-of-hand-over-retries = 10
+        }
     }
-
-    extensions = ["Akka.Cluster.Tools.Client.ClusterClientReceptionistExtensionProvider, Akka.Cluster.Tools"]
 }
 
 petabridge.cmd {

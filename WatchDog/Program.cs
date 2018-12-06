@@ -25,8 +25,7 @@ namespace WatchDog
             var hocon = await File.ReadAllTextAsync("watchDog.hocon").ConfigureAwait(false);
             var config = ConfigurationFactory.ParseString(hocon);
 
-            var cluster = ActorSystem.Create("MyCluster",
-                config.WithFallback(ClusterClientReceptionist.DefaultConfig()));
+            var cluster = ActorSystem.Create("MyCluster", config);
 
             // Use PBM to manage cluster membership
             var pbm = PetabridgeCmd.Get(cluster);
@@ -35,32 +34,13 @@ namespace WatchDog
             // Start Petabridge.Cmd host on 9111 (configured in HOCON)
             pbm.Start();
 
-            var watchdog = cluster.ActorOf(ClusterSingletonManager.Props(
-                singletonProps: Props.Create(() => new WatchDog()),
-                terminationMessage: PoisonPill.Instance,
-                settings: ClusterSingletonManagerSettings.Create(cluster).WithRole("watchdog")),
-                name: "watcher");
+            //var watchdog = cluster.ActorOf(ClusterSingletonManager.Props(
+            //    singletonProps: Props.Create(() => new WatchDog()),
+            //    terminationMessage: PoisonPill.Instance,
+            //    settings: ClusterSingletonManagerSettings.Create(cluster).WithRole("watchdog")),
+            //    name: "watchdog");
 
-            //var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
-
-            var supervisorStrategy = new OneForOneStrategy(
-                maxNrOfRetries: 10,
-                withinTimeRange: TimeSpan.FromMinutes(3),
-                decider: Decider.From(e =>
-                {
-                    if (e is DivideByZeroException ||
-                        e is UnknownOperationException)
-                            return Directive.Resume;
-                    return Directive.Escalate;
-                }));
-
-            var distributor =
-                cluster.ActorOf(
-                    Props.Create(() => new Worker())
-                        .WithRouter(FromConfig.Instance)
-                        .WithSupervisorStrategy(supervisorStrategy), "distributor");
-
-            ClusterClientReceptionist.Get(cluster).RegisterService(distributor);
+            var watchDog = cluster.ActorOf(Props.Create(() => new WatchDog()), "watchdog");
 
             Log.Logger.Information("worker router created");
 

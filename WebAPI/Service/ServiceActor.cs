@@ -23,7 +23,7 @@ namespace WebAPI.Service
         {
             _log = actorSystem.Log;
 
-            var receptionistAddress = Address.Parse("akka.tcp://MyCluster@localhost:4055");
+            var receptionistAddress = Address.Parse("akka.tcp://MyCluster@localhost:4053");
 
             var actorPaths = new List<ActorPath>
             {

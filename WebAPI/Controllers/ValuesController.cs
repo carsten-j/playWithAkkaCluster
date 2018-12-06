@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<string>>> Get()
         {
-            var res = await _service.Get(4, 5, "ADD");
+            var res = await _service.Get(4, 5, "FOO");
 
             var foo = res.Result.ToString();
 
